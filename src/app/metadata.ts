@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   },
 
   description:
-    "mentally present. spiritually somewhere else. — a personal internet artifact by Drixe.",
+    "not batman. but the playlist says otherwise.",
 
   metadataBase: new URL("https://drixe.lol"),
 
   openGraph: {
     title: "Drixe",
     description:
-      "thinking in lowercase. nothing urgent. everything intentional.",
+      "not batman. but the playlist says otherwise.",
     url: "https://drixe.lol",
     siteName: "drixe.lol",
     images: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Drixe — personal internet artifact",
+        alt: "Drixe — unfinished but online",
       },
     ],
     locale: "en_US",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Drixe",
     description:
-      "existing between playlists. built late. deployed later.",
+      "shipping vibes. ignoring bugs. pretending it’s intentional.",
     images: ["/og.png"],
   },
 
