@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Drixe",
     description:
-      "not batman. but the playlist says otherwise.",
+      "batman energy. civilian execution.",
     url: "https://drixe.lol",
     siteName: "drixe.lol",
     images: [

@@ -6,11 +6,12 @@ import { FaSpotify } from "react-icons/fa";
 import { useSpotify } from "@/app/hooks/useSpotify";
 import WhoAmI from "@/components/WhoAmI";
 const statusLines = [
-  "mentally present. spiritually somewhere else.",
-  "thinking in lowercase.",
-  "nothing urgent. everything intentional.",
-  "existing between playlists.",
+  "not batman. just tired.",
+  "operating in the shadows (room lights off).",
+  "vigilante mindset. civilian sleep schedule.",
+  "brooding. for no reason.",
 ];
+
 
 export default function Home() {
   const { now, recent, top } = useSpotify();
@@ -29,15 +30,16 @@ export default function Home() {
   /* ---------------- GREETING ---------------- */
   const hour = new Date().getHours();
   const greeting =
-    hour < 6
-      ? "this hour knows secrets."
-      : hour < 12
-      ? "morning. let’s pretend."
-      : hour < 18
-      ? "another day, apparently."
-      : hour < 23
-      ? "night mode: enabled."
-      : "you weren’t supposed to be here.";
+  hour < 6
+    ? "the city is asleep."
+    : hour < 12
+    ? "daylight, unfortunately."
+    : hour < 18
+    ? "still in character."
+    : hour < 23
+    ? "operating after dark."
+    : "this is the bat-hour.";
+
 
   /* ---------------- AUDIO UNLOCK ---------------- */
   useEffect(() => {
