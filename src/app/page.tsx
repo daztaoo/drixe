@@ -2,19 +2,23 @@
 
 import { useEffect, useState } from "react";
 import Presence from "@/components/Presence";
-
+import { FaSpotify } from "react-icons/fa";
+import { useSpotify } from "@/app/hooks/useSpotify";
+import WhoAmI from "@/components/WhoAmI";
 const statusLines = [
   "mentally present. spiritually somewhere else.",
   "thinking in lowercase.",
   "nothing urgent. everything intentional.",
   "existing between playlists.",
 ];
+
 export default function Home() {
+  const { now, recent, top } = useSpotify();
+
   const [musicOn, setMusicOn] = useState(false);
   const [status, setStatus] = useState(0);
-  const [userInteracted, setUserInteracted] = useState(false);
 
-  // rotate status line
+  /* ---------------- STATUS ROTATION ---------------- */
   useEffect(() => {
     const i = setInterval(() => {
       setStatus((prev) => (prev + 1) % statusLines.length);
@@ -22,279 +26,233 @@ export default function Home() {
     return () => clearInterval(i);
   }, []);
 
-  // time greeting (NOT cringe)
+  /* ---------------- GREETING ---------------- */
   const hour = new Date().getHours();
   const greeting =
-  hour < 6
-    ? "this hour knows secrets."
-    : hour < 12
-    ? "morning. let’s pretend."
-    : hour < 18
-    ? "another day, apparently."
-    : hour < 23
-    ? "night mode: enabled."
-    : "you weren’t supposed to be here.";
+    hour < 6
+      ? "this hour knows secrets."
+      : hour < 12
+      ? "morning. let’s pretend."
+      : hour < 18
+      ? "another day, apparently."
+      : hour < 23
+      ? "night mode: enabled."
+      : "you weren’t supposed to be here.";
 
-
-  // unlock audio on first interaction
- useEffect(() => {
-  const unlockAudio = () => {
-    const audio = document.getElementById("bg-music") as HTMLAudioElement;
-    if (!audio) return;
-
-    if (audio.muted) {
+  /* ---------------- AUDIO UNLOCK ---------------- */
+  useEffect(() => {
+    const unlockAudio = () => {
+      const audio = document.getElementById("bg-music") as HTMLAudioElement;
+      if (!audio || !audio.muted) return;
       audio.muted = false;
       audio.play();
       setMusicOn(true);
-    }
-  };
+    };
 
-  window.addEventListener("click", unlockAudio, { once: true });
-  window.addEventListener("touchstart", unlockAudio, { once: true });
-  window.addEventListener("keydown", unlockAudio, { once: true });
-
-  return () => {
-    window.removeEventListener("click", unlockAudio);
-    window.removeEventListener("touchstart", unlockAudio);
-    window.removeEventListener("keydown", unlockAudio);
-  };
-}, []);
-
+    window.addEventListener("click", unlockAudio, { once: true });
+    window.addEventListener("keydown", unlockAudio, { once: true });
+    return () => {
+      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+    };
+  }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white px-4 py-14 relative overflow-hidden">
-
-      {/* Background */}
+    <main className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* ---------------- BACKGROUND ---------------- */}
       <img
-  src="/images/bg.gif"
-  className="absolute inset-0 w-full h-full object-cover opacity-40 blur-0"
-  alt="background"
-/>
+        src="/images/bg.gif"
+        className="absolute inset-0 w-full h-full object-cover opacity-30"
+        alt="background"
+      />
 
-
-      {/* Music */}
       <audio id="bg-music" src="/music.mp3" loop autoPlay muted />
 
-     {/* Music Toggle */}
-<button
-  onClick={() => {
-    const audio = document.getElementById("bg-music") as HTMLAudioElement;
-    if (!audio) return;
+      {/* ---------------- MUSIC TOGGLE ---------------- */}
+      <button
+        onClick={() => {
+          const audio = document.getElementById("bg-music") as HTMLAudioElement;
+          if (!audio) return;
+          audio.paused ? audio.play() : audio.pause();
+          setMusicOn(!audio.paused);
+        }}
+        className="fixed top-4 right-4 z-50 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs hover:bg-white/20"
+      >
+        {musicOn ? "too late now" : "tap to unlock lore"}
+      </button>
 
-    if (audio.paused) {
-      audio.muted = false;
-      audio.play();
-      setMusicOn(true);
-    } else {
-      audio.pause();
-      setMusicOn(false);
-    }
-  }}
-  className="
-    fixed top-4 right-4 z-30
-    flex items-center gap-2
-    px-4 py-2
-    rounded-full
-    bg-white/10 backdrop-blur
-    border border-white/20
-    text-xs
-    text-white/80
-    hover:bg-white/20
-    hover:scale-105
-    transition
-    animate-pulse
-  "
->
-  <span className="text-sm">
-    {musicOn ? "too late now" : "tap to unlock lore"}
-  </span>
+      {/* ================== DASHBOARD ================== */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-  <span
-    className={`w-2 h-2 rounded-full ${
-      musicOn ? "bg-green-400" : "bg-orange-400"
-    }`}
-  />
-</button>
+        {/* ================================================= */}
+        {/* ================= LEFT SIDE ==================== */}
+        {/* ================================================= */}
+        <div className="space-y-6">
 
+         {/* -------- PROFILE CARD -------- */}
+<div className="relative overflow-hidden bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/10">
 
-      {/* Container */}
-      <div className="relative z-10 max-w-lg mx-auto">
+  {/* subtle accent glow */}
+  <div className="absolute -top-24 -right-24 w-72 h-72 bg-white/10 rounded-full blur-3xl opacity-30 pointer-events-none" />
 
-        {/* Card */}
-        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-7 sm:p-9 border border-white/10 shadow-2xl">
-
-          {/* Greeting */}
-         <div className="mb-6 text-center">
-  <p className="text-[11px] uppercase text-white/40 tracking-widest">
-  {greeting}
-</p>
-
-</div>
-
-
-          {/* Profile */}
-          <div className="flex flex-col items-center text-center mt-2">
-
-            <img
-              src="/images/pfp.gif"
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-white/20 object-cover"
-              alt="profile"
-            />
-
-            <h1 className="mt-5 text-2xl sm:text-3xl font-bold">
-              Hi, i’m <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-300 bg-clip-text text-transparent">
-  Drixe
-</span>
-<p className="text-[11px] uppercase tracking-widest text-white/40 mt-1">
-  level 18 · jan 14
-</p>
-
-
-            </h1>
-
-            <p className="mt-2 text-sm text-white/70">
-              {statusLines[status]}
-            </p>
-          </div>
-
-          <div className="my-6 h-px bg-white/15" />
-
-          {/* About (FIXED, HUMAN) */}
-          <p className="text-center text-sm text-white/80 leading-relaxed">
-            Time bends before perfect intent.
-          </p>
-
-          {/* Presence */}
-          <Presence />
-<div className="mt-4 text-center">
-  <p className="text-xs text-white/50 tracking-wide">
-    viewed by <span className="text-white/80 font-medium">69</span> souls
-  </p>
-</div>
-
-          {/* Tags (NERD HUMOR, NOT CRINGE) */}
-          <div className="flex flex-wrap gap-2 justify-center mt-6">
-            {[
-              "makes questionable choices",
-              "overthinks professionally",
-              "acts calm, isn’t",
-              "runs on instincts",
-            ].map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 text-xs rounded-full bg-white/10 border border-white/15"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-{/* Favorites */}
-<div className="mt-12 space-y-10">
-
-  {/* Section title */}
-  <p className="text-center text-xs uppercase tracking-[0.3em] text-white/30">
-    personal favorites
+  {/* greeting */}
+  <p className="text-[11px] uppercase tracking-widest text-white/40 mb-5">
+    {greeting}
   </p>
 
-  {/* Games */}
-  <div className="text-center">
-    <p className="text-xs uppercase tracking-widest text-white/40 mb-4">
-      games
-    </p>
+  <div className="flex items-center gap-5">
 
-    <div className="flex justify-center gap-6">
-      {[
-        {
-          name: "Dead by Daylight",
-          img: "https://upload.wikimedia.org/wikipedia/en/b/b7/Dead_by_Daylight_Steam_header.jpg",
-        },
-        {
-          name: "Roblox",
-          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRU3PVRE_vleIyipQnw-7O8KiVVHHFbNTdCQA&s",
-        },
-        {
-          name: "Genshin Impact",
-          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO9K8jTewegEUTXNfgGeYWx8hztA2Ed4frkA&s",
-        },
-      ].map((game) => (
-        <div key={game.name} className="flex flex-col items-center gap-2">
-          <img
-            src={game.img}
-            className="w-16 h-16 rounded-xl object-cover opacity-80 hover:opacity-100 transition"
-            alt={game.name}
-          />
-          <p className="text-[11px] text-white/60">
-            {game.name}
-          </p>
-        </div>
-      ))}
+    {/* avatar */}
+    <div className="relative">
+      <img
+        src="/images/pfp.gif"
+        className="
+          w-20 h-20 rounded-full object-cover
+          border border-white/20
+          shadow-lg
+        "
+        alt="pfp"
+      />
+
+      {/* online dot (aesthetic, not literal) */}
+      <span className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-green-400 border-2 border-black" />
+    </div>
+
+    {/* identity */}
+    <div className="flex-1">
+      <h1 className="text-2xl font-semibold leading-tight">
+        Drixe
+      </h1>
+
+      <p className="text-xs text-white/50 tracking-wide">
+        Level 18 · Jan 14
+      </p>
+
+      {/* divider */}
+      <div className="mt-2 h-px w-10 bg-white/20" />
+
+      {/* rotating status */}
+      <p className="mt-2 text-sm text-white/70 leading-snug">
+        {statusLines[status]}
+      </p>
     </div>
   </div>
 
-  {/* Singers */}
-  <div className="text-center">
-    <p className="text-xs uppercase tracking-widest text-white/40 mb-4">
-      singers
+  {/* bottom accent */}
+  <div className="mt-5 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+            
+          </div>
+
+          {/* -------- DISCORD + SPOTIFY PRESENCE (UNCHANGED) -------- */}
+          
+            <Presence />
+
+        </div>
+
+        {/* ================================================= */}
+        {/* ================= RIGHT SIDE =================== */}
+        {/* ================================================= */}
+        <div className="lg:col-span-2 space-y-6">
+
+         <WhoAmI />
+          {/* ---------------- FAVORITES ---------------- */}
+          {/* ================= FAVORITES ================= */}
+<div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/10 overflow-hidden space-y-10">
+
+  {/* BACKGROUND DECOR */}
+  <img
+    src="/images/favs-bg.png"
+    className="absolute right-0 bottom-0 w-72 opacity-10 pointer-events-none"
+    alt=""
+  />
+
+  {/* TITLE */}
+  <p className="text-[11px] uppercase tracking-widest text-white/40">
+    favorites
+  </p>
+
+  {/* ---------- ARTISTS ---------- */}
+  <div>
+    <p className="text-[10px] uppercase tracking-widest text-white/30 mb-4">
+      artists on repeat
     </p>
 
-    <div className="flex justify-center gap-6">
+    <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
       {[
         {
           name: "Central Cee",
-          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSC0MWyV2GLAXfvS-cYL97zTdBhTJVjL6TdblQu24nsrY2yzZFV5viqE73hC_6icEOG5lGN6joyxt1kQCuYTn_vzIHYgiH834wf9yA_cnc&s=10",
-        },
-        {
-          name: "Daniel Di Angelo",
-          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzo2wR9-aL-U7u7AmSfG7WL_9BDhgcDLETV7kItqek9_7F7aio-7zf1gdsOuDFA939N-sbUA&s",
+          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB-EhUZKotDowANFQDnjhxt6NFh5pi7fd7TIcWCpusIeGmCJO9CKLMnIG15baioUroUIuSNGU2JAy10qYjic_lK3Eyd4Lb703h4u_ZqIdkMg&s=10",
+          link: "https://open.spotify.com/artist/5HqSLMA0bxFjWl2iVxg4u5",
         },
         {
           name: "Juice WRLD",
           img: "https://i.guim.co.uk/img/media/cd59a408307ade77175cbef95d736687c971baf6/0_1869_5792_3473/master/5792.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=1ccd7a4b4f2daa05ff26a5393439025c",
+          link: "https://open.spotify.com/artist/4MCBfE4596Uoi2O4DtmEMz",
+        },
+        {
+          name: "Daniel Di Angelo",
+          img: "https://i.scdn.co/image/ab6761610000e5eb7e2cf7db02a2a2ea1baffd64",
+          link: "https://open.spotify.com/artist/6I7Cz7n0qv6mF0b4P0UQkZ",
         },
       ].map((artist) => (
-        <div key={artist.name} className="flex flex-col items-center gap-2">
+        <a
+          key={artist.name}
+          href={artist.link}
+          target="_blank"
+          className="group text-center"
+        >
           <img
             src={artist.img}
-            className="w-16 h-16 rounded-full object-cover opacity-80 hover:opacity-100 transition"
-            alt={artist.name}
+            className="
+              aspect-square rounded-xl object-cover
+              opacity-80 group-hover:opacity-100
+              group-hover:scale-[1.03]
+              transition
+            "
           />
-          <p className="text-[11px] text-white/60">
+          <p className="mt-2 text-[11px] text-white/60 group-hover:text-white transition">
             {artist.name}
           </p>
-        </div>
+        </a>
       ))}
     </div>
   </div>
 
-  {/* Anime */}
-  <div className="text-center">
-    <p className="text-xs uppercase tracking-widest text-white/40 mb-4">
-      anime
+  {/* SOFT DIVIDER */}
+  <div className="h-px bg-white/10" />
+
+  {/* ---------- ANIME ---------- */}
+  <div>
+    <p className="text-[10px] uppercase tracking-widest text-white/30 mb-4">
+      anime i live in
     </p>
 
-    <div className="flex justify-center gap-6">
+    <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
       {[
         {
           name: "One Piece",
-          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq5ghQ04JPWOtq052rmDR0KoFINzAnK4CUqw&s",
+          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOeEk4HzTXFamq8ezW2WhkKCHIx0t2dT78EQ&s",
         },
         {
           name: "Demon Slayer",
-          img: "https://static01.nyt.com/images/2025/09/20/multimedia/19cul-demonslayer-review2-qglj/19cul-demonslayer-review2-qglj-mediumSquareAt3X.jpg",
+          img: "https://media.tenor.com/_UjzdE-oNusAAAAM/nezuko-demon-slayer.gif",
         },
         {
           name: "Horimiya",
-          img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT2TV-eDsLXDFg6yXjXRheZ2_moUtVono-wt-cZKZJ61PO-ohFiCkpEg5-sKLf2btNQGtnU4H0iclfy9OxjCEwXnRLLYXRAf3w1aGY3_w&s=10",
+          img: "https://i.pinimg.com/736x/7a/d5/01/7ad5010b4a7a3dba8617dc11b327f01f.jpg",
         },
       ].map((anime) => (
-        <div key={anime.name} className="flex flex-col items-center gap-2">
+        <div key={anime.name} className="text-center group">
           <img
             src={anime.img}
-            className="w-16 h-16 rounded-xl object-cover opacity-80 hover:opacity-100 transition"
-            alt={anime.name}
+            className="
+              aspect-square rounded-xl object-cover
+              opacity-80 group-hover:opacity-100
+              transition
+            "
           />
-          <p className="text-[11px] text-white/60">
+          <p className="mt-2 text-[11px] text-white/60">
             {anime.name}
           </p>
         </div>
@@ -302,58 +260,51 @@ export default function Home() {
     </div>
   </div>
 
-</div>
+  {/* SOFT DIVIDER */}
+  <div className="h-px bg-white/10" />
+
+  {/* ---------- GAMES ---------- */}
+  <div>
+    <p className="text-[10px] uppercase tracking-widest text-white/30 mb-4">
+      games i escape into
+    </p>
+
+    <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+      {[
+        {
+          name: "Dead by Daylight",
+          img: "https://upload.wikimedia.org/wikipedia/en/b/b7/Dead_by_Daylight_Steam_header.jpg",
+        },
+        {
+          name: "Roblox",
+          img: "https://upload.wikimedia.org/wikipedia/commons/4/48/Roblox_Logo_2021.png",
+        },
+        {
+          name: "Genshin Impact",
+          img: "https://i.ytimg.com/vi/spMAhbmBJrk/maxresdefault.jpg",
+        },
+      ].map((game) => (
+        <div key={game.name} className="text-center group">
+          <img
+            src={game.img}
+            className="
+              aspect-square rounded-xl object-cover
+              opacity-80 group-hover:opacity-100
+              transition
+            "
+          />
+          <p className="mt-2 text-[11px] text-white/60">
+            {game.name}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
 
 
-          {/* Socials */}
-          <div className="mt-9 flex justify-center gap-7">
-            <a href="https://instagram.com/arihanntt" target="_blank">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
-                className="w-6 opacity-70 hover:opacity-100 transition"
-              />
-            </a>
-            <a
-              href="https://open.spotify.com/user/31r3l3stkdiod6iz3vnurdmiltai"
-              target="_blank"
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/2111/2111624.png"
-                className="w-6 opacity-70 hover:opacity-100 transition"
-              />
-            </a>
-            <a
-              href="https://www.roblox.com/users/3621433441/profile"
-              target="_blank"
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/4/48/Roblox_Logo_2021.png"
-                className="w-6 opacity-70 hover:opacity-100 transition"
-              />
-            </a>
-          </div>
 
-          {/* CTA (REBRANDED, CLEAN) */}
-          <div className="mt-12 text-center">
-            <p className="text-sm text-white/70 mb-4">
-              if you know, you know.  
-if you don’t — you will.
-
-            </p>
-            <a
-              href="https://drixestudio.services"
-              className="inline-block px-6 py-3 rounded-full bg-white text-black text-sm font-semibold hover:scale-105 transition"
-            >
-              reach out
-
-            </a>
           </div>
         </div>
-
-        {/* Footer */}
-        <p className="mt-10 text-xs text-white/40 text-center">
-          built late. deployed later.
-        </p>
       </div>
     </main>
   );
