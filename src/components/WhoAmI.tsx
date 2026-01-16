@@ -3,15 +3,28 @@ import { useEffect, useRef, useState } from "react";
 import { FaDiscord, FaInstagram } from "react-icons/fa";
 import { SiRoblox } from "react-icons/si";
 
-const GLITCH_CHARS = "$%#@^&!*+=<>";
+// Removed < and > to prevent HTML rendering issues
+const GLITCH_CHARS = "$%#@^&!*+=";
 
 function glitchify(text: string) {
-  return text
-    .split("")
-    .map(() =>
-      GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
-    )
-    .join("");
+  const chars = text.split("");
+  
+  // 1. Pick how many chars to glitch (Max 4, or length of string)
+  const maxChanges = Math.min(chars.length, 4);
+  const numChanges = Math.floor(Math.random() * maxChanges) + 1;
+
+  // 2. Pick unique random positions
+  const indices = new Set<number>();
+  while (indices.size < numChanges) {
+    indices.add(Math.floor(Math.random() * chars.length));
+  }
+
+  // 3. Swap those specific characters
+  indices.forEach((index) => {
+    chars[index] = GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+  });
+
+  return chars.join("");
 }
 
 const GIFS = [
@@ -66,10 +79,10 @@ const GIFS = [
   },
 ];
 
-
-
 export default function WhoAmI() {
-  const baseLocation = `"&**&^*"`;
+  // Use strictly 4 characters to ensure stability
+  const baseLocation = "****"; 
+  
   const [glitchText, setGlitchText] = useState(baseLocation);
   const [hearts, setHearts] = useState<number[]>([]);
   const loveRef = useRef<HTMLSpanElement>(null);
@@ -78,7 +91,7 @@ export default function WhoAmI() {
   useEffect(() => {
     const i = setInterval(() => {
       setGlitchText(glitchify(baseLocation));
-    }, 100); // nonstop fast glitch
+    }, 100); 
     return () => clearInterval(i);
   }, []);
 
@@ -93,7 +106,7 @@ export default function WhoAmI() {
 
   return (
     <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/10 overflow-hidden">
-
+      
       {/* BACKGROUND PNG */}
       <img
         src="/images/about-bg.png"
@@ -102,32 +115,31 @@ export default function WhoAmI() {
       />
 
       {/* SOCIAL LINKS */}
-<div className="absolute top-4 right-4 flex gap-3">
-  <a
-    href="https://discord.com/users/928934131893686292"
-    target="_blank"
-    className="opacity-70 hover:opacity-100 transition"
-  >
-    <FaDiscord className="w-5 h-5" />
-  </a>
+      <div className="absolute top-4 right-4 flex gap-3">
+        <a
+          href="https://discord.com/users/928934131893686292"
+          target="_blank"
+          className="opacity-70 hover:opacity-100 transition"
+        >
+          <FaDiscord className="w-5 h-5" />
+        </a>
 
-  <a
-    href="https://instagram.com/arihanntt"
-    target="_blank"
-    className="opacity-70 hover:opacity-100 transition"
-  >
-    <FaInstagram className="w-5 h-5" />
-  </a>
+        <a
+          href="https://instagram.com/arihanntt"
+          target="_blank"
+          className="opacity-70 hover:opacity-100 transition"
+        >
+          <FaInstagram className="w-5 h-5" />
+        </a>
 
-  <a
-    href="https://www.roblox.com/users/3621433441/profile"
-    target="_blank"
-    className="opacity-70 hover:opacity-100 transition"
-  >
-    <SiRoblox className="w-5 h-5" />
-  </a>
-</div>
-
+        <a
+          href="https://www.roblox.com/users/3621433441/profile"
+          target="_blank"
+          className="opacity-70 hover:opacity-100 transition"
+        >
+          <SiRoblox className="w-5 h-5" />
+        </a>
+      </div>
 
       {/* ---------------- ABOUT ME ---------------- */}
       <p className="text-[11px] uppercase tracking-widest text-white/40 mb-3">
@@ -137,7 +149,8 @@ export default function WhoAmI() {
       <p className="text-sm text-white/70 leading-relaxed">
         I&apos;m <span className="text-white font-medium">Drixe (Arihant)</span> —
         an 18 year old hobby developer and music enjoyer from{" "}
-        <span className="inline-block font-mono text-white/80 blur-[0.6px]">
+        {/* FIXED: Added fixed width (w-[50px]), whitespace-nowrap, and inline-block */}
+        <span className="inline-block w-[50px] text-center whitespace-nowrap font-mono text-white/80 blur-[0.6px] align-bottom">
           {glitchText}
         </span>
       </p>

@@ -6,12 +6,11 @@ import { FaSpotify } from "react-icons/fa";
 import { useSpotify } from "@/app/hooks/useSpotify";
 import WhoAmI from "@/components/WhoAmI";
 const statusLines = [
-  "not batman. just tired.",
-  "operating in the shadows (room lights off).",
-  "vigilante mindset. civilian sleep schedule.",
-  "brooding. for no reason.",
+  "villain arc: pending",
+  "lurking (peacefully)",
+  "saving gotham (later)",
+  "dark mode enabled",
 ];
-
 
 export default function Home() {
   const { now, recent, top } = useSpotify();
@@ -127,7 +126,7 @@ export default function Home() {
       </h1>
 
       <p className="text-xs text-white/50 tracking-wide">
-        Level 18 · Jan 14
+        Level 19 · Jan 14
       </p>
 
       {/* divider */}
