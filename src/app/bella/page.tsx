@@ -1,50 +1,74 @@
 "use client";
-import React, { Suspense, useState, useRef, useMemo } from "react";
+import React, { Suspense, useState, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshDistortMaterial, Sphere, Stars, Sparkles, Float as DreiFloat } from "@react-three/drei";
+import { Float, MeshDistortMaterial, Sphere, Stars, Sparkles, TorusKnot, Environment } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
 
-// 3D Scene with Mouse Parallax
+// 3D Scene: The "Floating Ribbon" and Core
 function HeroScene({ isPlaying }: { isPlaying: boolean }) {
-  const sphereRef = useRef<THREE.Mesh>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const bowRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (sphereRef.current) {
-      // Subtle mouse tracking
-      const x = (state.mouse.x * 0.5);
-      const y = (state.mouse.y * 0.5);
-      sphereRef.current.position.x = THREE.MathUtils.lerp(sphereRef.current.position.x, x, 0.1);
-      sphereRef.current.position.y = THREE.MathUtils.lerp(sphereRef.current.position.y, y, 0.1);
+    const t = state.clock.getElapsedTime();
+    if (meshRef.current) {
+      meshRef.current.rotation.y = t * 0.2;
+      meshRef.current.position.y = Math.sin(t) * 0.1;
+    }
+    if (bowRef.current) {
+      bowRef.current.rotation.z = Math.sin(t * 0.5) * 0.2;
+      bowRef.current.rotation.x = t * 0.1;
     }
   });
 
   return (
     <>
-      <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
-      <Sparkles count={100} scale={10} size={2} speed={0.5} color="#ffb6c1" />
-      <ambientLight intensity={0.4} />
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} color="#ff007f" />
+      <Stars radius={100} depth={50} count={isPlaying ? 4000 : 1000} factor={4} saturation={0} fade speed={1} />
+      <Sparkles count={80} scale={10} size={4} speed={0.4} color="#ffb6c1" />
       
-      <DreiFloat speed={isPlaying ? 6 : 2} rotationIntensity={2} floatIntensity={2}>
-        <Sphere ref={sphereRef} args={[1, 128, 128]} scale={1.8}>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} intensity={2} color="#ff77aa" />
+      <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} color="#ffffff" />
+
+      <Float speed={2} rotationIntensity={1} floatIntensity={1}>
+        {/* The Central Glow */}
+        <Sphere ref={meshRef} args={[1, 100, 100]} scale={1.2}>
           <MeshDistortMaterial
-            color="#ff4d94"
-            attach="material"
-            distort={isPlaying ? 0.5 : 0.2} 
-            speed={isPlaying ? 4 : 1}
-            roughness={0.1}
-            metalness={0.8}
-            emissive="#ff007f"
-            emissiveIntensity={0.2}
+            color={isPlaying ? "#ffb6c1" : "#444"}
+            distort={0.4}
+            speed={3}
+            roughness={0}
+            metalness={0.9}
+            emissive={isPlaying ? "#ff77aa" : "#000"}
+            emissiveIntensity={0.5}
           />
         </Sphere>
-      </DreiFloat>
+
+        {/* The "Ribbon/Bow" Symbolism - TorusKnot looks like a stylized bow */}
+        <TorusKnot 
+          ref={bowRef} 
+          args={[0.8, 0.2, 200, 32, 2, 3]} 
+          position={[0, 0, 0]} 
+          rotation={[0, 0, Math.PI / 4]}
+        >
+          <meshPhysicalMaterial 
+            color="#ff0044" 
+            clearcoat={1} 
+            clearcoatRoughness={0.1} 
+            reflectivity={1}
+            emissive="#ff0044"
+            emissiveIntensity={isPlaying ? 0.8 : 0.1}
+          />
+        </TorusKnot>
+      </Float>
+      
+      <Environment preset="city" />
     </>
   );
 }
 
-export default function BellaUltraPage() {
+export default function BellaHelloKittyPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -53,117 +77,110 @@ export default function BellaUltraPage() {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play().catch(() => {});
+        // Mobile fix: force reload and play
+        audioRef.current.load();
+        audioRef.current.play().catch((e) => console.log("Play blocked", e));
       }
       setIsPlaying(!isPlaying);
     }
   };
 
   return (
-    <main className="relative h-screen w-screen bg-[#050103] overflow-hidden selection:bg-pink-500/30">
-      {/* High-End Noise Overlay */}
-      <div className="absolute inset-0 z-[10] opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-      
-      {/* Deep Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-pink-900/20 blur-[150px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-900/10 blur-[150px] rounded-full" />
+    <main className="relative h-screen w-screen bg-[#0a0a0a] overflow-hidden">
+      {/* Aesthetic Overlays */}
+      <div className={`absolute inset-0 transition-colors duration-1000 z-10 pointer-events-none ${isPlaying ? 'bg-pink-500/10' : 'bg-transparent'}`} />
+      <div className="absolute inset-0 z-20 opacity-[0.04] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
-      {/* 3D Engine */}
+      {/* 3D Canvas */}
       <div className="absolute inset-0 z-0">
-        <Canvas camera={{ position: [0, 0, 5] }}>
+        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
           <Suspense fallback={null}>
             <HeroScene isPlaying={isPlaying} />
           </Suspense>
         </Canvas>
       </div>
 
-      {/* Interface */}
-      <div className="relative z-20 h-full w-full flex flex-col justify-between p-10 md:p-20">
+      {/* UI Elements */}
+      <div className="relative z-30 h-full w-full flex flex-col justify-between p-8 md:p-12">
         
         {/* Header */}
-        <div className="flex justify-between items-start">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }} 
-            animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col"
-          >
-            <span className="text-[10px] tracking-[0.4em] text-pink-500 font-bold uppercase">Personal Archive</span>
-            <span className="text-pink-100/50 text-xs">2026 // 001</span>
+        <div className="flex justify-between items-start font-mono">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-white/40 text-[9px] tracking-[0.5em] uppercase">
+            System.Aesthetic / 2026
           </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }} 
-            animate={{ opacity: 1, x: 0 }}
-            className="text-right"
-          >
-            <span className="text-[10px] tracking-[0.4em] text-pink-100 font-light uppercase">For Bella</span>
-          </motion.div>
+          <div className="bg-pink-500/20 border border-pink-500/30 px-3 py-1 rounded-full backdrop-blur-md">
+            <span className="text-pink-300 text-[10px] font-bold tracking-widest uppercase">Hello Bella</span>
+          </div>
         </div>
 
-        {/* Centerpiece */}
-        <div className="flex flex-col items-center">
+        {/* Main Title */}
+        <div className="flex flex-col items-center text-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 2, ease: "easeOut" }}
-            className="text-center"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.5, ease: "circOut" }}
           >
-            <h1 className="text-6xl md:text-[120px] font-extralight text-white leading-none tracking-tighter italic">
-              City of <br />
-              <span className="font-bold text-pink-400 drop-shadow-[0_0_40px_rgba(255,77,148,0.4)]">Stars</span>
+            <h2 className="text-pink-200/50 text-xs tracking-[1em] uppercase mb-4 font-light">
+              Dreaming of
+            </h2>
+            <h1 className="text-7xl md:text-[140px] font-black text-white leading-[0.8] tracking-tighter">
+              CITY <br /> 
+              <span className="text-pink-500 drop-shadow-[0_0_30px_rgba(255,0,68,0.5)]">STARS</span>
             </h1>
-            
-            <div className="mt-12 flex flex-col items-center gap-6">
-               <motion.button
-                onClick={toggleAudio}
-                whileHover={{ scale: 1.05 }}
-                className="group relative flex items-center gap-4 px-8 py-4 bg-white/5 border border-white/10 rounded-full overflow-hidden transition-all backdrop-blur-xl"
-              >
-                <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-pink-500 animate-ping' : 'bg-white/40'}`} />
-                <span className="text-[10px] tracking-[0.3em] uppercase text-white font-medium">
-                  {isPlaying ? "Stop the stars" : "Begin Experience"}
-                </span>
-                {/* Visualizer bars */}
-                <div className="flex gap-1 h-3 items-end">
-                    {[1,2,3].map((i) => (
-                        <motion.div 
-                            key={i}
-                            animate={{ height: isPlaying ? [4, 12, 6, 10] : 4 }}
-                            transition={{ repeat: Infinity, duration: 0.5 + (i * 0.1) }}
-                            className="w-[1px] bg-pink-400"
-                        />
-                    ))}
-                </div>
-              </motion.button>
-            </div>
           </motion.div>
+
+          <motion.button
+            onClick={toggleAudio}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-12 group relative flex items-center gap-6 px-10 py-5 bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-2xl transition-all"
+          >
+            <div className={`w-3 h-3 rounded-full ${isPlaying ? 'bg-pink-500 animate-pulse' : 'bg-white/20'}`} />
+            <span className="text-xs tracking-[0.4em] uppercase text-white font-bold">
+              {isPlaying ? "DONT STOP IT" : "Tap to play"}
+            </span>
+            {/* Minimal Audio Visualizer */}
+            <div className="flex gap-1 items-end h-4">
+              {[1, 2, 3, 4].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{ height: isPlaying ? [4, 16, 8, 14] : 4 }}
+                  transition={{ repeat: Infinity, duration: 0.4 + i * 0.1 }}
+                  className="w-[2px] bg-pink-500"
+                />
+              ))}
+            </div>
+          </motion.button>
         </div>
 
-        {/* Footer */}
+        {/* Footer info */}
         <div className="flex justify-between items-end">
-          <div className="max-w-[200px]">
-            <p className="text-[10px] leading-relaxed text-pink-100/30 uppercase tracking-widest">
-              A tribute to a voice that sounds like home.
-            </p>
+          <div className="text-white/20 text-[10px] flex flex-col gap-1 uppercase tracking-tighter">
+            <span>Location: CITY OF STARS</span>
+            <span>Frequency: 432Hz</span>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <AnimatePresence>
-                {isPlaying && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="text-pink-400 text-xs italic"
-                    >
-                        "Are you shining just for me?"
-                    </motion.div>
-                )}
-            </AnimatePresence>
-          </div>
+
+          <AnimatePresence>
+            {isPlaying && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="bg-white px-6 py-2 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+              >
+                <span className="text-black text-[10px] font-bold uppercase tracking-[0.2em]">
+                  "Shining just for me"
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      <audio ref={audioRef} loop src="/city-of-stars.mp3" />
+      <audio ref={audioRef} loop playsInline preload="auto" src="/city-of-stars.mp3" />
+
+      {/* Retro Pink Scanline Effect */}
+      <div className="absolute inset-0 pointer-events-none z-50 bg-gradient-to-b from-transparent via-pink-500/[0.02] to-transparent bg-[length:100%_4px] opacity-20" />
     </main>
   );
 }
