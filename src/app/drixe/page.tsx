@@ -134,7 +134,7 @@ export default function Home() {
 
             {/* ARTISTS */}
             <div className="space-y-8">
-              <p className={cn("text-[10px] uppercase tracking-[0.6em] text-zinc-300", cinzel.className)}>
+              <p className={cn("text-[10px] uppercase tracking-[0.6em] text-black", cinzel.className)}>
                 Auditory Repeat
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-10">
@@ -144,14 +144,14 @@ export default function Home() {
                   { name: "Daniel Di Angelo", img: "https://i.scdn.co/image/ab6761610000e5eb7e2cf7db02a2a2ea1baffd64" },
                 ].map((artist) => (
                   <div key={artist.name} className="group cursor-crosshair">
-                    <div className="overflow-hidden border border-black/[0.03] aspect-square bg-zinc-50">
+                    <div className="overflow-hidden border border-black/[0.03] aspect-square bg-black">
                       <img
                         src={artist.img}
                         className="w-full h-full object-cover grayscale opacity-30100 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000"
                         alt={artist.name}
                       />
                     </div>
-                    <p className={cn("mt-4 text-[10px] tracking-[0.3em] text-zinc-300 group-hover:text-black transition-colors uppercase font-bold", mono.className)}>
+                    <p className={cn("mt-4 text-[10px] tracking-[0.3em] text-black group-hover:text-black transition-colors uppercase font-bold", mono.className)}>
                       {artist.name}
                     </p>
                   </div>
@@ -161,7 +161,7 @@ export default function Home() {
 
             {/* ANIME */}
             <div className="space-y-8">
-              <p className={cn("text-[10px] uppercase tracking-[0.6em] text-zinc-300", cinzel.className)}>
+              <p className={cn("text-[10px] uppercase tracking-[0.6em] text-black", cinzel.className)}>
                 Visual Chronicles
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-10">
@@ -178,7 +178,7 @@ export default function Home() {
                         alt={anime.name}
                       />
                     </div>
-                    <p className={cn("mt-4 text-[10px] tracking-[0.3em] text-zinc-300 group-hover:text-black transition-colors uppercase font-bold", mono.className)}>
+                    <p className={cn("mt-4 text-[10px] tracking-[0.3em] text-black group-hover:text-black transition-colors uppercase font-bold", mono.className)}>
                       {anime.name}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function Home() {
 
             {/* GAMES */}
             <div className="space-y-8">
-              <p className={cn("text-[10px] uppercase tracking-[0.6em] text-zinc-300", cinzel.className)}>
+              <p className={cn("text-[10px] uppercase tracking-[0.6em] text-black", cinzel.className)}>
                 Virtual Escapism
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-10">
@@ -205,7 +205,7 @@ export default function Home() {
                         alt={game.name}
                       />
                     </div>
-                    <p className={cn("mt-4 text-[10px] tracking-[0.3em] text-zinc-300 group-hover:text-black transition-colors uppercase font-bold", mono.className)}>
+                    <p className={cn("mt-4 text-[10px] tracking-[0.3em] text-black group-hover:text-black transition-colors uppercase font-bold", mono.className)}>
                       {game.name}
                     </p>
                   </div>

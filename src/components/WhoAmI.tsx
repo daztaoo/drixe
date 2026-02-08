@@ -90,7 +90,7 @@ export default function WhoAmI() {
 
       {/* --- SECTION: ABOUT --- */}
       <div className="mb-12">
-        <p className={cn("text-[10px] uppercase tracking-[0.6em] text-zinc-300 mb-6", cinzel.className)}>
+        <p className={cn("text-[10px] uppercase tracking-[0.6em] text-black mb-6", cinzel.className)}>
           ABOUT ME
         </p>
 
@@ -107,7 +107,7 @@ export default function WhoAmI() {
 
       {/* --- SECTION: INTERESTS --- */}
       <div className="mb-12">
-        <p className={cn("text-[10px] uppercase tracking-[0.6em] text-zinc-300 mb-6", cinzel.className)}>
+        <p className={cn("text-[10px] uppercase tracking-[0.6em] text-black mb-6", cinzel.className)}>
           INTERESTS
         </p>
 
@@ -129,7 +129,7 @@ export default function WhoAmI() {
 
       {/* --- SECTION: ARCHIVE (GIFS) --- */}
       <div className="space-y-6">
-        <p className={cn("text-[10px] uppercase tracking-[0.6em] text-zinc-300", cinzel.className)}>
+        <p className={cn("text-[10px] uppercase tracking-[0.6em] text-black", cinzel.className)}>
           Visual_Artifacts
         </p>
         
