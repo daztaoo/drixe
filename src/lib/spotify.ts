@@ -71,12 +71,22 @@ export async function getAccessToken(): Promise<{
 export async function spotifyFetch<T>(
   endpoint: string
 ): Promise<T | null> {
-  const { access_token } = await getAccessToken();
+ let access_token: string;
+
+try {
+  const token = await getAccessToken();
+  access_token = token.access_token;
+} catch (err) {
+  console.error("Spotify token refresh failed:", err);
+  return null;
+}
+
 
  const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 8000);
 
-let res;
+let res: Response | null = null;
+
 try {
   res = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
@@ -87,10 +97,14 @@ try {
   });
 } catch (err) {
   console.error("Spotify fetch failed:", err);
-  throw new Error("SPOTIFY_FETCH_FAILED");
-} finally {
   clearTimeout(timeout);
+  return null; // ← DO NOT THROW
 }
+
+clearTimeout(timeout);
+
+if (!res) return null;
+
 
 
   if (res.status === 204 || res.status === 404) {
@@ -98,9 +112,11 @@ try {
   }
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error("Spotify API error: " + err);
-  }
+  const err = await res.text();
+  console.error("Spotify API error:", err);
+  return null; // never crash
+}
+
 
   return res.json() as Promise<T>;
 }

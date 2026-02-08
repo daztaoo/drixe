@@ -30,6 +30,9 @@ export default function Home() {
   const { now, recent, top } = useSpotify();
   const [musicOn, setMusicOn] = useState(false);
   const [status, setStatus] = useState(0);
+  const [showPlayer, setShowPlayer] = useState(false);
+const [spotifyEmbed, setSpotifyEmbed] = useState<string | null>(null);
+
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -42,17 +45,38 @@ export default function Home() {
   const greeting =
     hour < 6 ? "the moon is high." : hour < 12 ? "daylight breaks." : hour < 18 ? "the sun fades." : "the ritual begins.";
 
-  useEffect(() => {
-    const unlockAudio = () => {
-      const audio = document.getElementById("bg-music") as HTMLAudioElement;
-      if (!audio || !audio.muted) return;
-      audio.muted = false;
-      audio.play();
-      setMusicOn(true);
-    };
-    window.addEventListener("click", unlockAudio, { once: true });
-    return () => window.removeEventListener("click", unlockAudio);
-  }, []);
+useEffect(() => {
+  let trackUrl: string | undefined;
+
+  // 1️⃣ Currently playing
+  if (now?.isPlaying && now.song?.url) {
+    trackUrl = now.song.url;
+  }
+
+  // 2️⃣ Fallback to most recent
+  else if (recent?.length > 0 && recent[0]?.url) {
+    trackUrl = recent[0].url;
+  }
+
+  // 3️⃣ Fallback to top track
+  else if (top?.length > 0 && top[0]?.url) {
+    trackUrl = top[0].url;
+  }
+
+  if (trackUrl) {
+    const trackId = trackUrl.split("/track/")[1]?.split("?")[0];
+    if (trackId) {
+      setSpotifyEmbed(`https://open.spotify.com/embed/track/${trackId}`);
+      return;
+    }
+  }
+
+  setSpotifyEmbed(null);
+  setShowPlayer(false);
+}, [now, recent, top]);
+
+
+
 
   return (
     <main className="min-h-screen bg-white text-black relative overflow-hidden selection:bg-black selection:text-white">
@@ -63,23 +87,34 @@ export default function Home() {
         <div className="w-px h-full bg-black" />
       </div>
 
-      <audio id="bg-music" src="/music.mp3" loop autoPlay muted />
+
 
       {/* --- AUDIO TOGGLE --- */}
-      <button
-        onClick={() => {
-          const audio = document.getElementById("bg-music") as HTMLAudioElement;
-          if (!audio) return;
-          audio.paused ? audio.play() : audio.pause();
-          setMusicOn(!audio.paused);
-        }}
-        className={cn(
-          "fixed top-6 right-6 z-[100] px-6 py-2 border border-black bg-white text-[10px] font-black tracking-[0.3em] uppercase hover:bg-black hover:text-white transition-all",
-          mono.className
-        )}
-      >
-        {musicOn ? "MUTE_SIGNAL" : "UNVEIL_AUDIO"}
-      </button>
+     <button
+  onClick={() => {
+    if (spotifyEmbed) {
+      setShowPlayer(!showPlayer);
+    }
+  }}
+  className={cn(
+    "fixed top-6 right-6 z-[100] px-6 py-2 border border-black bg-white text-[10px] font-black tracking-[0.3em] uppercase hover:bg-black hover:text-white transition-all",
+    mono.className
+  )}
+>
+  {spotifyEmbed ? (showPlayer ? "HIDE_PLAYER" : "UNVEIL_AUDIO") : "NO_SIGNAL"}
+</button>
+{showPlayer && spotifyEmbed && (
+  <div className="fixed top-20 right-6 z-[99] w-[300px] border border-black bg-white shadow-xl">
+    <iframe
+      src={spotifyEmbed}
+      width="100%"
+      height="80"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy"
+    />
+  </div>
+)}
+
 
       {/* --- DASHBOARD GRID --- */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-32 grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
