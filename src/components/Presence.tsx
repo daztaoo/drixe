@@ -241,7 +241,7 @@ const extractGradientFromImage = (imgUrl: string) => {
       className="relative w-full border-[3px] border-black p-6 md:p-10 space-y-12 bg-white transition-all duration-1000 rounded-[2.5rem] shadow-[24px_24px_0px_0px_rgba(0,0,0,0.03)] overflow-hidden"
       style={{
   borderColor: accentGradient ? "black" : "black",
-  background: accentGradient ? accentGradient : "white",
+  background: accentGradient ? accentGradient : "#1f1f1f",
 }}
 
     >
