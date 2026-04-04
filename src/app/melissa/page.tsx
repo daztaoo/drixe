@@ -257,7 +257,7 @@ function S2_Donkey({ active }: { active: boolean }) {
   const [taps,   setTaps]   = useState(0);
   const [talk,   setTalk]   = useState(false);
   const [msg,    setMsg]    = useState("");
-  const [sparks, setSparks] = useState([]);
+  const [sparks, setSparks] = useState<{ id: number; emoji: string }[]>([]);
   const timerRef = useRef(null);
 
   const tap = useCallback(() => {
