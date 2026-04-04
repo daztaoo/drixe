@@ -258,7 +258,7 @@ function S2_Donkey({ active }: { active: boolean }) {
   const [talk,   setTalk]   = useState(false);
   const [msg,    setMsg]    = useState("");
   const [sparks, setSparks] = useState<{ id: number; emoji: string }[]>([]);
-  const timerRef = useRef(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const tap = useCallback(() => {
     setTaps(t => t+1);
@@ -267,7 +267,7 @@ function S2_Donkey({ active }: { active: boolean }) {
     boom(22);
     const id = Date.now();
     setSparks(s=>[...s,{id,emoji:["⭐","💫","✨","🎉","💜","🫏","🔥"][~~(Math.random()*7)]}]);
-    clearTimeout(timerRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(()=>{setTalk(false);setSparks([]);},2100);
   },[]);
 
