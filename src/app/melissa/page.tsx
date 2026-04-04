@@ -107,7 +107,7 @@ function boom(n=80) {
 /* ══════════════════════════════════════════
    SHREK DONKEY SVG
 ══════════════════════════════════════════ */
-function ShrekDonkey({ px=260, talking=false, party=false, style={} }) {
+function ShrekDonkey({ px=260, talking=false, party=false, style={} }: { px?: number, talking?: boolean, party?: boolean, style?: React.CSSProperties }) {
   return (
     <svg width={px} height={px*1.1} viewBox="0 0 220 242" style={style}>
       <defs>
@@ -197,7 +197,7 @@ function ShrekDonkey({ px=260, talking=false, party=false, style={} }) {
 /* ══════════════════════════════════════════
    SCENE 1 — CURTAIN
 ══════════════════════════════════════════ */
-function S1_Curtain({ onOpen, open }) {
+function S1_Curtain({ onOpen, open }: { onOpen: () => void; open: boolean }) {
   return (
     <div className="scene" style={{background:"#0A0A0A"}}>
       {/* Spotlight */}
@@ -253,7 +253,7 @@ const MSGS = [
   "BRAY BRAY BRAY BRAY BRAY!! 🎉",
 ];
 
-function S2_Donkey({ active }) {
+function S2_Donkey({ active }: { active: boolean }) {
   const [taps,   setTaps]   = useState(0);
   const [talk,   setTalk]   = useState(false);
   const [msg,    setMsg]    = useState("");
@@ -340,7 +340,7 @@ const THREAD = [
   { from:"donkey", text:"now get up we are celebrating ALL DAY" },
 ];
 
-function S3_Chat({ active }) {
+function S3_Chat({ active }: { active: boolean }) {
   const [shown, setShown]     = useState(0);
   const [typing, setTyping]   = useState(false);
   const bottomRef             = useRef(null);
@@ -506,7 +506,7 @@ function S3_Chat({ active }) {
 /* ══════════════════════════════════════════
    SCENE 4 — THE TROLL 💍
 ══════════════════════════════════════════ */
-function S4_Troll({ active }) {
+function S4_Troll({ active }: { active: boolean }) {
   const [open,  setOpen]  = useState(false);
   const [stamp, setStamp] = useState(false);
 
