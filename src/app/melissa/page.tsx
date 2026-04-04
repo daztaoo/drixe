@@ -343,7 +343,7 @@ const THREAD = [
 function S3_Chat({ active }: { active: boolean }) {
   const [shown, setShown]     = useState(0);
   const [typing, setTyping]   = useState(false);
-  const bottomRef             = useRef(null);
+  const bottomRef             = useRef<HTMLDivElement>(null);
 
   const next = useCallback(() => {
     if (shown >= THREAD.length) return;
@@ -609,7 +609,7 @@ function S4_Troll({ active }: { active: boolean }) {
 export default function MelissaBirthday() {
   const [open,    setOpen]    = useState(false);
   const [scene,   setScene]   = useState(0);
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(()=>{
     const s = document.createElement("style");
@@ -626,7 +626,7 @@ export default function MelissaBirthday() {
     return ()=>c.removeEventListener("scroll",h);
   },[]);
 
-  const goTo = i => scrollRef.current?.scrollTo({top:i*window.innerHeight,behavior:"smooth"});
+  const goTo = (i: number) => scrollRef.current?.scrollTo({top:i*window.innerHeight,behavior:"smooth"});
 
   const handleOpen = () => {
     setOpen(true);
