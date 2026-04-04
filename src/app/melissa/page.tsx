@@ -543,7 +543,7 @@ function S4_Troll({ active }: { active: boolean }) {
 
             {/* Corner ornaments */}
             {[[0,0,"0,0"],[0,1,"0,auto"],[1,0,"auto,0"],[1,1,"auto,auto"]].map(([ti,li,pos],i)=>{
-              const [tv,lv]=pos.split(",");
+              const [tv,lv]=(pos as string).split(",");
               return <div key={i} style={{position:"absolute",top:tv==="0"?"0":"auto",bottom:tv==="auto"?"0":"auto",left:lv==="0"?"0":"auto",right:lv==="auto"?"0":"auto",width:"clamp(36px,9vw,60px)",height:"clamp(36px,9vw,60px)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"clamp(14px,3.5vw,20px)",color:"rgba(184,154,94,0.4)",transform:i===1?"rotate(90deg)":i===2?"rotate(-90deg)":i===3?"rotate(180deg)":""}}>❋</div>;
             })}
 
