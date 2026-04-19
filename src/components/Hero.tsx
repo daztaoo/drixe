@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronRight, Activity, Plus, Sword, Skull } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,32 @@ const inter = Inter_Tight({ subsets: ["latin"], weight: ["400", "600", "800"] })
 const mono = JetBrains_Mono({ subsets: ["latin"] });
 
 export function Hero() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [availability, setAvailability] = useState<"idle"|"checking"|"available"|"taken"|"invalid">("idle");
   const { scrollY } = useScroll();
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const checkAvailability = (val: string) => {
+    const cleaned = val.trim().toLowerCase();
+    if (cleaned.length < 3) { setAvailability("idle"); return; }
+    if (!/^[a-z0-9_]{3,24}$/.test(cleaned)) { setAvailability("invalid"); return; }
+    setAvailability("checking");
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/check-username?username=${cleaned}`);
+        const json = await res.json();
+        setAvailability(json.available ? "available" : "taken");
+      } catch { setAvailability("idle"); }
+    }, 600);
+  };
+
+  const handleClaim = () => {
+    if (availability !== "available") return;
+    const cleaned = username.trim().toLowerCase();
+    router.push(`/auth?view=signup&username=${cleaned}`);
+  };
 
   const yMain = useTransform(scrollY, [0, 800], [0, -120]);
   const ySword = useTransform(scrollY, [0, 1000], [0, -150]);
@@ -113,21 +139,54 @@ export function Hero() {
             className="mt-8 space-y-6"
           >
             <div className="w-full max-w-sm">
-              <div className="flex items-center border-b-2 border-black pb-2">
-                <span className={cn("text-zinc-300 text-lg", goth.className)}>
-                  drixe.lol/
-                </span>
+              <div className={cn(
+                "flex items-center border-b-2 pb-2 transition-colors duration-300",
+                availability === "available" ? "border-green-500" :
+                availability === "taken" ? "border-red-400" : "border-black"
+              )}>
+                <span className={cn("text-zinc-300 text-lg flex-shrink-0", goth.className)}>drixe.lol/</span>
                 <input
                   type="text"
                   placeholder="username"
-                  className={cn(
-                    "w-full px-2 outline-none bg-transparent text-2xl placeholder:text-zinc-200",
-                    goth.className
-                  )}
+                  value={username}
+                  onChange={(e) => {
+                    const val = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+                    setUsername(val);
+                    checkAvailability(val);
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && handleClaim()}
+                  maxLength={24}
+                  className={cn("w-full px-2 outline-none bg-transparent text-2xl placeholder:text-zinc-200", goth.className)}
                 />
-                <button className="hover:scale-110 transition">
-                  <ChevronRight size={30} strokeWidth={1.5} />
-                </button>
+                {/* Status indicator */}
+                {availability === "checking" && (
+                  <div className="w-5 h-5 border-2 border-zinc-300 border-t-black rounded-full animate-spin flex-shrink-0" />
+                )}
+                {availability === "available" && (
+                  <span className="text-green-500 text-xl flex-shrink-0">✓</span>
+                )}
+                {availability === "taken" && (
+                  <span className="text-red-400 text-xl flex-shrink-0">✗</span>
+                )}
+                {availability === "idle" && (
+                  <button onClick={handleClaim} className="hover:scale-110 transition opacity-30" disabled>
+                    <ChevronRight size={30} strokeWidth={1.5} />
+                  </button>
+                )}
+                {availability === "available" && (
+                  <button onClick={handleClaim} className="hover:scale-110 transition text-green-500">
+                    <ChevronRight size={30} strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
+              <div className={cn("text-[10px] mt-2", mono.className)}>
+                {availability === "available" && <span className="text-green-500">✓ Available — claim it!</span>}
+                {availability === "taken" && <span className="text-red-400">✗ Taken — try another</span>}
+                {availability === "invalid" && <span className="text-zinc-400">Only a-z, 0-9, underscores · 3-24 chars</span>}
+                {availability === "checking" && <span className="text-zinc-400">Checking availability...</span>}
+                {availability === "idle" && username.length > 0 && username.length < 3 && (
+                  <span className="text-zinc-400">At least 3 characters required</span>
+                )}
               </div>
             </div>
 

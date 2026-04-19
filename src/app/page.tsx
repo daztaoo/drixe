@@ -14,6 +14,8 @@ import { PrivacySection } from "@/components/privacy";
 import { Pricing } from "@/components/pricing";
 import { FAQ } from "@/components/faq";
 import { Footer } from "@/components/Footer";
+import { SocialProof } from "@/components/SocialProof";
+
  
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +39,7 @@ export default function Home() {
       <HowItWorks />
       <PrivacySection />
       <Pricing />
+      <SocialProof />
       <FAQ />
       <Footer />
 

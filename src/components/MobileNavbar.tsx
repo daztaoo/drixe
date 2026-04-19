@@ -1,99 +1,169 @@
 "use client";
 
-import React, { useState } from "react";
-import { Menu, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Menu, X, LayoutDashboard, LogIn, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import {
-  Cinzel_Decorative,
-  Inter_Tight
-} from "next/font/google";
+import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
 
-const cinzel = Cinzel_Decorative({ weight: ["400", "700"], subsets: ["latin"] });
-const inter = Inter_Tight({ subsets: ["latin"], weight: ["400", "600"] });
+const NAV_LINKS = [
+  { text: "Features", href: "#features" },
+  { text: "Pricing", href: "#pricing" },
+  { text: "FAQ", href: "#faq" },
+];
 
 export function MobileNavbar() {
   const [open, setOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
 
-  const links = ["Discord", "Features", "Pricing", "FAQ"];
+  // Auth awareness
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setIsLoggedIn(true);
+        const { data } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+        if (data?.username) setUsername(data.username);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  const close = () => setOpen(false);
 
   return (
     <>
       {/* TOP BAR */}
-      <nav className="md:hidden fixed top-0 left-0 right-0 z-[200] bg-white/90 backdrop-blur-md border-b border-black/[0.05]">
-        <div className="h-20 px-6 flex items-center justify-between">
-
-          <img
-            src="/my-logo.png"
-            alt="Drixe"
-            className="h-10 w-auto object-contain grayscale brightness-0"
-          />
+      <nav className="md:hidden fixed top-0 left-0 right-0 z-[200] bg-white/95 backdrop-blur-md border-b border-black/[0.06]">
+        <div className="h-16 px-5 flex items-center justify-between">
+          <Link href="/" onClick={close}>
+            <img
+              src="/my-logo.png"
+              alt="Drixe"
+              className="h-8 w-auto object-contain grayscale brightness-0"
+            />
+          </Link>
 
           <button
             onClick={() => setOpen(!open)}
-            className="text-black"
+            className="w-10 h-10 flex items-center justify-center text-black hover:bg-black/5 rounded-lg transition-colors"
+            aria-label="Toggle menu"
           >
-            {open ? <X size={24} /> : <Menu size={24} />}
+            {open ? <X size={20} /> : <Menu size={20} />}
           </button>
-
         </div>
       </nav>
 
-      {/* OVERLAY MENU */}
+      {/* BACKDROP */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ y: -40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -40, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden fixed inset-0 z-[150] bg-white pt-24 px-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={close}
+            className="md:hidden fixed inset-0 z-[210] bg-black/20 backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* SLIDE-IN DRAWER (from right) */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="md:hidden fixed top-0 right-0 bottom-0 z-[220] w-72 bg-white border-l border-black/[0.07] flex flex-col pt-16 pb-8 px-8 shadow-2xl"
           >
+            {/* Close button inside drawer */}
+            <button
+              onClick={close}
+              className="absolute top-4 right-5 text-black/40 hover:text-black transition-colors"
+            >
+              <X size={20} />
+            </button>
 
-            <div className="flex flex-col gap-8">
-
-              {links.map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "text-3xl tracking-[0.2em] text-black",
-                    cinzel.className
-                  )}
+            {/* NAV LINKS */}
+            <nav className="flex flex-col gap-1 mt-6">
+              {NAV_LINKS.map((item, i) => (
+                <motion.a
+                  key={item.text}
+                  href={item.href}
+                  onClick={close}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 + 0.1 }}
+                  className="py-3 text-xl tracking-[0.15em] uppercase text-black/70 hover:text-black transition-colors border-b border-black/[0.05] font-[var(--font-cinzel)]"
                 >
-                  {item.toUpperCase()}
-                </a>
+                  {item.text}
+                </motion.a>
               ))}
+            </nav>
 
-              <div className="mt-12 flex flex-col gap-6">
-
-                <a
-                  href="#"
-                  className={cn(
-                    "text-sm uppercase tracking-[0.3em] text-zinc-500",
-                    inter.className
+            {/* AUTH ACTIONS */}
+            <div className="mt-auto flex flex-col gap-3">
+              {isLoggedIn ? (
+                <>
+                  {username && (
+                    <Link
+                      href={`/${username}`}
+                      target="_blank"
+                      onClick={close}
+                      className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 hover:text-black transition-colors text-center"
+                    >
+                      View My Profile ↗
+                    </Link>
                   )}
-                >
-                  Login
-                </a>
-
-                <button
-                  className={cn(
-                    "border border-black py-3 text-sm uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all",
-                    inter.className
-                  )}
-                >
-                  Join Beta
-                </button>
-
-              </div>
-
+                  <Link
+                    href="/dashboard"
+                    onClick={close}
+                    className="flex items-center justify-center gap-2 py-3 bg-black text-white text-[11px] uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all"
+                  >
+                    <LayoutDashboard size={13} />
+                    Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth"
+                    onClick={close}
+                    className="flex items-center justify-center gap-2 py-3 border border-black/20 text-[11px] uppercase tracking-[0.3em] text-zinc-600 hover:border-black hover:text-black transition-all"
+                  >
+                    <LogIn size={13} />
+                    Login
+                  </Link>
+                  <Link
+                    href="/auth?view=signup"
+                    onClick={close}
+                    className="flex items-center justify-center gap-2 py-3 bg-black text-white text-[11px] uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all"
+                  >
+                    <Zap size={13} />
+                    Sign Up Free
+                  </Link>
+                </>
+              )}
             </div>
-
           </motion.div>
         )}
       </AnimatePresence>
     </>
   );
 }
+
+
+
