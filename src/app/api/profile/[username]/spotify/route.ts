@@ -15,10 +15,9 @@ const supabaseAdmin = createClient(
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
-  const { username } = params;
-
+  const { username } = await params;
   // 1. Look up user's profile
   const { data: profile } = await supabaseAdmin
     .from("profiles")
