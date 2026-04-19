@@ -13,12 +13,13 @@ import {
 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { Suspense } from "react";
 
 const gothic = UnifrakturMaguntia({ weight: ["400"], subsets: ["latin"] });
 const inter = Inter_Tight({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const mono = JetBrains_Mono({ subsets: ["latin"] });
 
-export default function AuthPage() {
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -56,6 +57,7 @@ export default function AuthPage() {
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
   };
+  
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -356,5 +358,13 @@ export default function AuthPage() {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="text-white p-10">Loading...</div>}>
+      <AuthContent />
+    </Suspense>
   );
 }
