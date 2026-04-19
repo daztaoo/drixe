@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getBasicAuthHeader } from "@/lib/spotify";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {
@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get("code");
   const error = searchParams.get("error");
 
-  // User denied access
   if (error || !code) {
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_URL}/dashboard/integrations?spotify=denied`
@@ -25,7 +24,7 @@ export async function GET(req: NextRequest) {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "Authorization": getBasicAuthHeader(),
+      Authorization: getBasicAuthHeader(),
     },
     body: new URLSearchParams({
       grant_type: "authorization_code",
@@ -56,9 +55,29 @@ export async function GET(req: NextRequest) {
 
   const me = await meRes.json();
 
-  // 3. Get the current Supabase user from the session cookie
-  const supabase = createRouteHandlerClient({ cookies });
-  const { data: { user } } = await supabase.auth.getUser();
+const cookieStore = await cookies();
+
+const supabase = createServerClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    cookies: {
+      get(name: string): string | undefined {
+        return cookieStore.get(name)?.value as string | undefined;
+      },
+      set(name: string, value: string, options: any): void {
+        // no-op
+      },
+      remove(name: string, options: any): void {
+        // no-op
+      },
+    },
+  }
+);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.redirect(
@@ -66,22 +85,24 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 4. Upsert to integrations table
-  // Never expose refresh_token to the client — it stays in DB only
-  const { error: dbError } = await supabase.from("integrations").upsert({
-    user_id: user.id,
-    platform: "spotify",
-    platform_user_id: me.id,
-    platform_username: me.display_name,
-    access_token,
-    refresh_token,
-    token_expires_at: new Date(Date.now() + expires_in * 1000).toISOString(),
-    is_enabled: true,
-    show_on_profile: true,
-    updated_at: new Date().toISOString(),
-  }, {
-    onConflict: "user_id,platform",
-  });
+  // 4. Upsert to DB
+  const { error: dbError } = await supabase.from("integrations").upsert(
+    {
+      user_id: user.id,
+      platform: "spotify",
+      platform_user_id: me.id,
+      platform_username: me.display_name,
+      access_token,
+      refresh_token,
+      token_expires_at: new Date(Date.now() + expires_in * 1000).toISOString(),
+      is_enabled: true,
+      show_on_profile: true,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      onConflict: "user_id,platform",
+    }
+  );
 
   if (dbError) {
     console.error("Supabase upsert error:", dbError);
@@ -90,7 +111,6 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 5. Success — redirect back to integrations dashboard
   return NextResponse.redirect(
     `${process.env.NEXT_PUBLIC_URL}/dashboard/integrations?spotify=connected`
   );
