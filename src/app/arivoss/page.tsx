@@ -434,9 +434,7 @@ export default function AriVossPage() {
               />
             </div>
 
-            <p className="mt-3 text-xs text-zinc-600">
-              Bike image slot: public/arivoss/bike.png
-            </p>
+            
           </div>
 
           <div className="space-y-7">
