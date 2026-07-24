@@ -462,12 +462,14 @@ function DesktopPanel({
 
       {/* Counter */}
       <motion.p
-        style={{ opacity: contentOpacity }}
-        className="absolute bottom-10 right-16 text-[11px] font-mono uppercase tracking-[0.35em]"
-        style={{ color: `${panel.accent}60` } as React.CSSProperties}
-      >
-        {String(index + 1).padStart(2, "0")} / {String(PANELS.length).padStart(2, "0")}
-      </motion.p>
+  className="absolute bottom-10 right-16 text-[11px] font-mono uppercase tracking-[0.35em]"
+  style={{
+    opacity: contentOpacity,
+    color: `${panel.accent}60`,
+  }}
+>
+  {String(index + 1).padStart(2, "0")} / {String(PANELS.length).padStart(2, "0")}
+</motion.p>
     </li>
   );
 }
