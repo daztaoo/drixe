@@ -1,0 +1,58 @@
+/* Base container wrapper */
+.dot-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: transparent;
+  /* Soft vignette edge masking so dots smoothly fade out at container boundaries */
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+}
+
+.dot-grid__wrap {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  cursor: crosshair; /* Sleek high-tech cursor */
+}
+
+/* Canvas styling with GPU acceleration & glowing blend mode */
+.dot-grid__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: auto; /* Enables mouse interactions directly on canvas */
+  
+  /* GPU hardware acceleration hints for smooth 60fps rendering */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  /* Screen/Additive color blending makes overlapping neon glows pop dramatically */
+  mix-blend-mode: screen;
+}
+
+/* Ambient dark purple background glow behind the dots (Optional depth layer) */
+.dot-grid::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  height: 60%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(124, 92, 252, 0.12) 0%,
+    rgba(19, 13, 42, 0) 70%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
